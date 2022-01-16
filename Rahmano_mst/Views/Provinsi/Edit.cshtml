@@ -1,0 +1,115 @@
+﻿@model Rahmano_mst.Models.provinsi
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="panel panel-default thumbnail form-group" id="my-form">
+        <div hidden="hidden">
+            @Html.EditorFor(model => model.provinsi_id, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+        <div class="panel-heading isiValue0 h4">Data Provinsi</div>
+        <div class="panel-body isiValue2">
+            <table width="100%">
+                <tr style="height:45px;">
+                    <td width="120px" class="judulColom">Provinsi</td>
+                    <td class="judulColom">:</td>
+                    <td>
+                        @Html.EditorFor(model => model.provinsi_name, new { htmlAttributes = new { @class = "form-control", maxlength = "50", @style = "width:100%; max-width: 100%;" } })
+                    </td>
+                </tr>
+                <tr style="height:21px;">
+                    <td class="judulColom">Keterangan</td>
+                    <td class="judulColom">:</td>
+                    <td>
+                        @Html.TextAreaFor(model => model.provinsi_desc, new { @class = "form-control", maxlength = "250", @style = "width:100%; max-width: 100%;", rows = "4" })
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div>
+        <fieldset class="thumbnail" style="margin-bottom:15px">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <table align="right">
+                <tr>
+                    <td width="100%">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdHapus" style="width:100px" class="btn btn-info btn-xs btn-block" value="Hapus" />
+                    </td>
+                    <td width="5px">&nbsp;</td>
+                    <td><a href="@Url.Content("~/Provinsi/Index")"><input type="button" style="width:100px" class="btn btn-info btn-xs btn-block" value="Back to List" /></a></td>
+                    <td width="5px">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdSimpan" style="width:100px" class="btn btn-info btn-xs btn-block" value="Simpan" />
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+
+
+}
+
+<script type="text/javascript">
+    $('#cmdSimpan').click(function () {
+        var salah = 0;
+
+        if ($('#provinsi_name').val().length === 0) {
+            salah = 1;
+            alert('provinsi belum diisi');
+            $('#provinsi_name').focus();
+        }
+
+        if (salah === 0) {
+
+            var prov = { "provinsi_id": "", "provinsi_name": "", "provinsi_desc": "" }
+            prov.provinsi_id = $('#provinsi_id').val();
+            prov.provinsi_name = $('#provinsi_name').val();
+            prov.provinsi_desc = $('#provinsi_desc').val();
+
+            var formData = new FormData();
+            formData.append('provinsi', JSON.stringify(prov));
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Simpan")',
+                type: 'POST',
+                datatype: "JSON",
+                processData: false,
+                contentType: false,
+                data: formData,
+                processData: false,
+                success: function (pesan) {
+                    alert(pesan.msg);
+                    window.location.href = '/Provinsi/Index';
+                },
+                error: function (er) {
+                    alert('Data Provisni Gagal disimpan');
+                }
+            })
+        }
+    })
+
+    $("#cmdHapus").click(function () {
+        var r = confirm("Apakah anda akan menghapus data Provinsi");
+        if (r == true) {
+            $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Hapus")',
+                    dataType: 'json',
+                    data: { id: $('#provinsi_id').val()},
+                    success: function (pesan) {
+                        alert(pesan.msg);
+                        if (pesan.salah == 0) { window.location.href = '/Provinsi/Index'; }
+                    },
+                    error: function (er) {
+                        alert('Data Provinsi Gagal dihapus');
+                    }
+                });
+            };
+    });
+</script>

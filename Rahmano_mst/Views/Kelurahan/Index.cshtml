@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewBag.Title = "Data Kelurahan";
+}
+
+<div id="my-form">
+    <div class="panel panel-default thumbnail">
+        <div class="panel-heading">
+            <table width="100%" height="35px">
+                <tr>
+                    <td class="judul" width="100px">List&nbsp;Kelurahan&nbsp;</td>
+                    <td style="width:18%">
+                        @Html.DropDownList("provinsi_id", ViewBag.provinsi as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td style="width:18%">
+                        @Html.DropDownList("kabupaten_id", ViewBag.kabupaten as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:18%">
+                        @Html.DropDownList("kecamatan_id", ViewBag.kecamatan as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td style="width:15%">
+                        @Html.Editor("kelurahan_name", new { htmlAttributes = new { @class = "form-control", @style = "width:100%; max-width: 100%;" } })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td width="60px">
+                        <input type="button" value="Search" id="btnSearch" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                    <td width="5px"></td>
+                    <td></td>
+                    <td width="80px">
+                        <input type="button" value="New" id="btnCreate" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <div class="table-responsive" style="font-size:12px;margin-bottom:-15px;" id="exampleGrid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        bacaData();
+    });
+
+    $('#btnSearch').click(function () {
+        bacaData();
+    })
+
+    $('#provinsi_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKabupaten")',
+        type: 'GET',
+            data: { id: $('#provinsi_id').val() },
+            success: function (grade) {
+                $('#kabupaten_id').empty();
+                $.each(grade, function (i, item) {
+                    $('#kabupaten_id').append('<option value="' + item.kabupaten_id + '">' + item.kabupaten_name + '</option>');
+                })
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    $('#kabupaten_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKecamatan")',
+        type: 'GET',
+            data: { id: $('#kabupaten_id').val() },
+            success: function (grade) {
+                $('#kecamatan_id').empty();
+                $.each(grade, function (i, item) {
+                    $('#kecamatan_id').append('<option value="' + item.kecamatan_id + '">' + item.kecamatan_name + '</option>');
+                })
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kecamatan tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    function bacaData() {
+        if ($('#provinsi_id').val() == 0) { $('#provinsi_id').val(1)}
+        $.ajax({
+            url: '@Url.Action("SearchList")',
+            type: 'POST',
+            data: { id: $('#provinsi_id').val(), kid: $('#kabupaten_id').val(), kcid: $('#kecamatan_id').val(), kel: $('#kelurahan_name').val()},
+            success: function (trans) {
+                conData(trans);
+            },
+            error: function () { bootbox.alert('Data Kelurahan tidak dapat ditemukan'); }
+        });
+
+    }
+
+    function conData(trans) {
+        $("#exampleGrid").simplePagingGrid({
+            //minimumVisibleRows: 10,
+            pageSize: 10,
+            columnNames: ["No.", "Provinsi", "Kabupaten", "Kecamatan", "Kelurahan", "Keterangan", "..."],
+            columnKeys: ["nomor", "provinsi_name", "kabupaten_name", "kecamatan_name", "kelurahan_name", "kelurahan_desc", "kelurahan_id"],
+            sortable: [false, false, false, false, false, false, false],
+            columnWidths: ["30px", "18%", "18%", "18%", "", "", "40px"],
+            showLoadingOverlay: false,
+            pageNumber: 0,
+            tableClass: "table table-striped table-bordered",
+            cellTemplates: [null, null, null, null, null, null, '<img alt="Detail Kelurahan" onclick="bukaKelurahan({{kelurahan_id}})" src="/images/edit-icon.png"/>'],
+            data: trans
+        });
+    }
+
+    $('#btnCreate').click(function () {
+        window.location = "/Kelurahan/Edit/0";
+    });
+
+    function bukaKelurahan(id) {
+        window.location = "/Kelurahan/Edit/" + id;
+    };
+</script>
+

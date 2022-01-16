@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RAHMANO (Programmer Practice Test for MST)" />
+    <title>@ViewBag.Title - RAHMANO Test for MTS</title>
+
+    <link href="~/Content/simplePagingGrid-0.6.0.0.css" rel="stylesheet">
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/simplePagingGrid-0.6.0.0.js" type="text/javascript"></script>
+    <script src="~/Scripts/handlebars-1.0.rc.1.js" type="text/javascript"></script>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    
+    <div class="container body-content" style="margin-top:-40px">
+        <div class="jumbotron">
+            <div class="navbar-header" style="margin-top:-35px">
+                <a id="logo" href="/" title="Mitra Solusi Telematika">
+                    <img class="logo-main scale-with-grid" width="150" src="~/Images/mst-logo-header-2.png" alt="mst-logo-header-2" />
+                </a>
+                &nbsp;
+            </div>
+            <ul class="nav navbar-nav"  style="margin-top:-25px">
+                <li>@Html.ActionLink("Provinsi", "Index", "Provinsi")</li>
+                <li>@Html.ActionLink("Kabupaten", "Index", "Kabupaten")</li>
+                <li>@Html.ActionLink("Kecamatan", "Index", "Kecamatan")</li>
+                <li>@Html.ActionLink("Kode Pos", "Index", "KodePos")</li>
+                <li>@Html.ActionLink("Kelurahan", "Index", "Kelurahan")</li>
+            </ul>
+        </div>
+        <div style="margin-top:-20px">
+            @RenderBody()
+        </div>
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Rahmano</p>
+        </footer>
+    </div>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

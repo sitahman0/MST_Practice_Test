@@ -1,0 +1,106 @@
+﻿
+@{
+    ViewBag.Title = "Data Kecamatan";
+}
+
+<div id="my-form">
+    <div class="panel panel-default thumbnail">
+        <div class="panel-heading">
+            <table width="100%" height="35px">
+                <tr>
+                    <td class="judul" width="100px">List&nbsp;Kecamatan&nbsp;</td>
+                    <td style="width:20%">
+                        @Html.DropDownList("provinsi_id", ViewBag.provinsi as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td style="width:20%">
+                        @Html.DropDownList("kabupaten_id", ViewBag.kabupaten as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td style="width:20%">
+                        @Html.Editor("kecamatan_name", new { htmlAttributes = new { @class = "form-control", @style = "width:100%; max-width: 100%;" } })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td width="80px">
+                        <input type="button" value="Search" id="btnSearch" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                    <td></td>
+                    <td width="80px">
+                        <input type="button" value="New" id="btnCreate" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <div class="table-responsive" style="font-size:12px;margin-bottom:-15px;" id="exampleGrid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        bacaData();
+    });
+
+    $('#btnSearch').click(function () {
+        bacaData();
+    })
+
+    $('#provinsi_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKabupaten")',
+        type: 'GET',
+            data: { id: $('#provinsi_id').val() },
+            success: function (grade) {
+                $('#kabupaten_id').empty();
+                $.each(grade, function (i, item) {
+                    $('#kabupaten_id').append('<option value="' + item.kabupaten_id + '">' + item.kabupaten_name + '</option>');
+                })
+                isiData1();
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    function bacaData() {
+        $.ajax({
+            url: '@Url.Action("SearchList")',
+            type: 'POST',
+            data: { id: $('#provinsi_id').val(), kid: $('#kabupaten_id').val(), kec: $('#kecamatan_name').val()},
+            success: function (trans) {
+                conData(trans);
+            },
+            error: function () { bootbox.alert('Data Kecamatan tidak dapat ditemukan'); }
+        });
+
+    }
+
+    function conData(trans) {
+        $("#exampleGrid").simplePagingGrid({
+            //minimumVisibleRows: 10,
+            pageSize: 10,
+            columnNames: ["No.", "Provinsi", "Kabupaten", "Kota/Kab", "Kecamatan", "Keterangan", "..."],
+            columnKeys: ["nomor", "provinsi_name", "kabupaten_name", "jenis_kota", "kecamatan_name", "kecamatan_desc", "kecamatan_id"],
+            sortable: [false, false, false, false, false, false, false],
+            columnWidths: ["30px", "20%", "", "100px", "", "", "40px"],
+            showLoadingOverlay: false,
+            pageNumber: 0,
+            tableClass: "table table-striped table-bordered",
+            cellTemplates: [null, null, null, null, null, null, '<img alt="Detail Kecamatan" onclick="bukaKecamatan({{kecamatan_id}})" src="/images/edit-icon.png"/>'],
+            data: trans
+        });
+    }
+
+    $('#btnCreate').click(function () {
+        window.location = "/Kecamatan/Edit/0";
+    });
+
+    function bukaKecamatan(id) {
+        window.location = "/Kecamatan/Edit/" + id;
+    };
+</script>
+

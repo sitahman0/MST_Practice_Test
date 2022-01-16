@@ -1,0 +1,162 @@
+﻿@model Rahmano_mst.Models.kecamatan
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="panel panel-default thumbnail form-group" id="my-form">
+        <div hidden="hidden">
+            @Html.EditorFor(model => model.kecamatan_id, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+        <div class="panel-heading isiValue0 h4">Data Kabupaten</div>
+        <div class="panel-body isiValue2">
+            <table width="100%">
+                <tr style="height:45px;">
+                    <td width="120px" class="judulColom">Provinsi</td>
+                    <td class="judulColom">:</td>
+                    <td colspan="4">
+                        @Html.DropDownList("provinsi_id", ViewBag.provinsi as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                </tr>
+                <tr style="height:45px;">
+                    <td width="120px" class="judulColom">Kabupaten</td>
+                    <td class="judulColom">:</td>
+                    <td colspan="4">
+                        @Html.DropDownList("kabupaten_id", ViewBag.kabupaten as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="judulColom">Kecamatan</td>
+                    <td class="judulColom">:</td>
+                    <td colspan="4">
+                        @Html.EditorFor(model => model.kecamatan_name, new { htmlAttributes = new { @class = "form-control", maxlength = "50", @style = "width:100%; max-width: 100%;" } })
+                    </td>
+                </tr>
+                <tr style="height:21px;">
+                    <td class="judulColom">Keterangan</td>
+                    <td class="judulColom">:</td>
+                    <td colspan="4">
+                        @Html.TextAreaFor(model => model.kecamatan_desc, new { @class = "form-control", maxlength = "250", @style = "width:100%; max-width: 100%;", rows = "4" })
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div>
+        <fieldset class="thumbnail" style="margin-bottom:15px">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <table align="right">
+                <tr>
+                    <td width="100%">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdHapus" style="width:100px" class="btn btn-info btn-xs btn-block" value="Hapus" />
+                    </td>
+                    <td width="5px">&nbsp;</td>
+                    <td><a href="@Url.Content("~/Kecamatan/Index")"><input type="button" style="width:100px" class="btn btn-info btn-xs btn-block" value="Back to List" /></a></td>
+                    <td width="5px">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdSimpan" style="width:100px" class="btn btn-info btn-xs btn-block" value="Simpan" />
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+
+
+}
+
+<script type="text/javascript">
+    $('#provinsi_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKabupaten")',
+        type: 'GET',
+            data: { id: $('#provinsi_id').val() },
+            success: function (grade) {
+                $('#kabupaten_id').empty();
+                $.each(grade, function (i, item) {
+                    $('#kabupaten_id').append('<option value="' + item.kabupaten_id + '">' + item.kabupaten_name + '</option>');
+                })
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    $('#cmdSimpan').click(function () {
+        var salah = 0;
+
+        if ($('#provinsi_id').val() == 0) {
+            salah = 1;
+            alert('Provinsi belum dipilih');
+            $('#provinsi_id').focus();
+        }
+
+        if ($('#kabupaten_id').val() == 0) {
+            salah = 1;
+            alert('Kabupaten belum dipilih');
+            $('#kabupaten_id').focus();
+        }
+
+        if (salah == 0) {
+            if ($('#kecamatan_name').val().length === 0) {
+                salah = 1;
+                alert('kabupaten belum diisi');
+                $('#kecamatan_name').focus();
+            }
+        }
+
+        if (salah === 0) {
+
+            var prov = { "kecamatan_id": "", "kabupaten_id":"", "provinsi_id":"", "kecamatan_name": "", "kecamatan_desc": "" }
+            prov.kecamatan_id = $('#kecamatan_id').val();
+            prov.kabupaten_id = $('#kabupaten_id').val();
+            prov.provinsi_id = $('#provinsi_id').val();
+            prov.kecamatan_name = $('#kecamatan_name').val();
+            prov.kecamatan_desc = $('#kecamatan_desc').val();
+
+            var formData = new FormData();
+            formData.append('kecamatan', JSON.stringify(prov));
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Simpan")',
+                type: 'POST',
+                datatype: "JSON",
+                processData: false,
+                contentType: false,
+                data: formData,
+                processData: false,
+                success: function (pesan) {
+                    alert(pesan.msg);
+                    if (pesan.salah == 0) { window.location.href = '/Kecamatan/Index';}
+                },
+                error: function (er) {
+                    alert('Data Provisni Gagal disimpan');
+                }
+            })
+        }
+    })
+
+    $("#cmdHapus").click(function () {
+        var r = confirm("Apakah anda akan menghapus data Kecamatan");
+        if (r == true) {
+            $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Hapus")',
+                    dataType: 'json',
+                    data: { id: $('#kecamatan_id').val()},
+                    success: function (pesan) {
+                        alert(pesan.msg);
+                        window.location.href = '../Index/';
+                    },
+                    error: function (er) {
+                        alert('Data Kecamatan Gagal dihapus');
+                    }
+                });
+            };
+    });
+</script>

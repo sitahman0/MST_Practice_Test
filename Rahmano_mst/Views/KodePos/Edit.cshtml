@@ -1,0 +1,338 @@
+﻿@model Rahmano_mst.Models.kodepos
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+<div id="my-form">
+    <div hidden="hidden">
+        @Html.EditorFor(model => model.kodepos_id, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel panel-default thumbnail form-group" style="margin-left:-15px; margin-right:-10px;">
+            <div class="panel-heading isiValue2 h4" style="margin-top:5px">Kode Pos</div>
+            <div class="panel-body isiValue2" style="height:270px; margin-top:-10px">
+                <table width="100%">
+                    <tr style="height:45px;">
+                        <td width="120px" class="judulColom">Provinsi</td>
+                        <td class="judulColom">:</td>
+                        <td>
+                            @Html.DropDownList("provinsi_id", ViewBag.provinsi as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                        </td>
+                    </tr>
+                    <tr style="height:45px;">
+                        <td class="judulColom">Kodepos</td>
+                        <td class="judulColom">:</td>
+                        <td>
+                            @Html.EditorFor(model => model.kodepos_no, new { htmlAttributes = new { @class = "form-control", maxlength = "50", @style = "width:100%; max-width: 100%;" } })
+                        </td>
+                    </tr>
+                    <tr style="height:21px;">
+                        <td class="judulColom">Keterangan</td>
+                        <td class="judulColom">:</td>
+                        <td>
+                            @Html.TextAreaFor(model => model.kodepos_desc, new { @class = "form-control", maxlength = "250", @style = "width:100%; max-width: 100%;", rows = "3" })
+                        </td>
+                    </tr>
+                    <tr style="height:45px;">
+                        <td width="120px" class="judulColom">Kabupaten</td>
+                        <td class="judulColom">:</td>
+                        <td>
+                            @Html.DropDownList("kabupaten_id", ViewBag.kabupaten as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                        </td>
+                    </tr>
+                    <tr style="height:45px;">
+                        <td width="120px" class="judulColom">Kecamatan</td>
+                        <td class="judulColom">:</td>
+                        <td>
+                            @Html.DropDownList("kecamatan_id", ViewBag.kecamatan as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default thumbnail form-group" style="margin-left:-15px; margin-right:-10px;">
+            <div class="panel-heading isiValue2 h4 " style="margin-top:5px">Kelurahan</div>
+            <div class="panel-body" style="height: 270px; margin-top: -10px ">
+                <div style="overflow-y: scroll; height:250px">
+                    <div class="table-responsive" style="font-size:12px;margin-bottom:-15px;" id="exampleGrid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default thumbnail form-group" style="margin-left:-15px; margin-right:-10px;">
+            <div class="panel-heading isiValue2 h4 " style="margin-top:5px">List Kode Pos</div>
+            <div class="panel-body" style="margin-top:-10px">
+                <div>
+                    <div class="table-responsive" style="font-size:12px;margin-bottom:-15px;" id="koposGrid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="col-md-12">
+        <fieldset class="thumbnail" style="margin-left: -15px; margin-bottom: 5px; margin-right:-10px">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <table align="right">
+                <tr>
+                    <td width="100%">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdHapus" style="width:100px" class="btn btn-info btn-xs btn-block" value="Hapus" />
+                    </td>
+                    <td width="5px">&nbsp;</td>
+                    <td><a href="@Url.Content("~/Kecamatan/Index")"><input type="button" style="width:100px" class="btn btn-info btn-xs btn-block" value="Back to List" /></a></td>
+                    <td width="5px">&nbsp;</td>
+                    <td>
+                        <input type="button" id="cmdSimpan" style="width:100px" class="btn btn-info btn-xs btn-block" value="Simpan" />
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+}
+
+<script type="text/javascript">
+    var baris;
+
+    $(document).ready(function () {
+        isiKopos();
+    })
+
+    $('#grdWarningDtl').on('click', 'tr', function () {
+        baris = $(this).index();
+    });
+
+    $('#provinsi_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKabupaten")',
+        type: 'GET',
+            data: { id: $('#provinsi_id').val() },
+            success: function (grade) {
+                $('#kabupaten_id').empty();
+                $.each(grade, function (i, item) {
+                    $('#kabupaten_id').append('<option value="' + item.kabupaten_id + '">' + item.kabupaten_name + '</option>');
+                })
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    $('#kabupaten_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("getKecamatan")',
+        type: 'GET',
+            data: { id: $('#kabupaten_id').val() },
+            success: function (grade) {
+                $('#kecamatan_id').empty();
+                $.each(grade, function (i, item) {
+                    //alert(item.kecamatan_name);
+                    $('#kecamatan_id').append('<option value="' + item.kecamatan_id + '">' + item.kecamatan_name + '</option>');
+                })
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    $('#kecamatan_id').change(function () {
+        $.ajax({
+        url: '@Url.Action("lstKelurahanKopos")',
+        type: 'GET',
+            data: { id: $('#kecamatan_id').val(), kpos: $('#kodepos_id').val()},
+            success: function (trans) {
+                $("#exampleGrid").simplePagingGrid({
+                    minimumVisibleRows: trans.length,
+                    pageSize: trans.length + 10,
+                    pagingEnabled: false,
+                    columnNames: ["No.", "Kecamatan", "Kelurahan", "..."],
+                    columnKeys: ["nomor", "kecamatan_name", "kelurahan_name", "kelurahan_id"],
+                    sortable: [false, false, false, false],
+                    columnWidths: ["30px", "", "", "40px"],
+                    showLoadingOverlay: false,
+                    //pageNumber: 0,
+                    tableClass: "table table-striped table-bordered",
+                    cellTemplates: ['<label>{{nomor}}.</label>' +
+                        '<label id="prov{{kelurahan_id}}" hidden="hidden">{{provinsi_name}}</label>' +
+                        '<label id="kab{{kelurahan_id}}" hidden="hidden">{{kabupaten_name}}</label>'
+                        , '<label id="kec{{kelurahan_id}}">{{kecamatan_name}}</label>'
+                        , '<label id="kel{{kelurahan_id}}">{{kelurahan_name}}</label>'
+                        , '<input type="checkbox" id="chkRead{{kelurahan_id}}" onClick="cread({{kelurahan_id}})" {{masuk}}/>'],
+                    data: trans
+                    });
+            },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    })
+
+    function cread(nmr) {
+        var pilih = $('#chkRead' + nmr).is(":checked");
+        var ke = 0;
+        var isikopos = { "kelurahan_id": "0", "nomor": "0", "provinsi_name": "", "kabupaten_name": "", "kecamatan_name": "", "kelurahan_name": "", "dipilih": "", "masuk":""}
+        var isiAll = [];
+
+        $("#koposGrid tr:not(:first)").each(function () {
+            nilai = $($(this).find("td")[0]).find("label:eq(1)").text();
+            isikopos.kelurahan_id = $($(this).find("td")[0]).find("label:eq(1)").text();
+            isikopos.nomor = ke;
+            isikopos.provinsi_name = $($(this).find("td")[1]).find("label:eq(0)").text();
+            isikopos.kabupaten_name = $($(this).find("td")[2]).find("label:eq(0)").text();
+            isikopos.kecamatan_name = $($(this).find("td")[3]).find("label:eq(0)").text();
+            isikopos.kelurahan_name = $($(this).find("td")[4]).find("label:eq(0)").text();
+            isikopos.dipilih = 1;
+            isikopos.masuk = 1;
+
+            if (pilih || nmr != nilai) {
+                ke += 1;
+
+                isiAll.push(isikopos);
+                isikopos = { "kelurahan_id": "0", "nomor": "0", "provinsi_name": "", "kabupaten_name": "", "kecamatan_name": "", "kelurahan_name": "", "dipilih": "", "masuk": "" }
+            }
+        })
+        if (pilih) {
+            ke += 1;
+            isikopos.kelurahan_id = nmr;
+            isikopos.nomor = ke;
+            isikopos.provinsi_name = $('#prov' + nmr).text();
+            isikopos.kabupaten_name = $('#kab' + nmr).text();
+            isikopos.kecamatan_name = $('#kec' + nmr).text();
+            isikopos.kelurahan_name = $('#kel' + nmr).text();
+            isikopos.dipilih = 1;
+            isikopos.masuk = 1;
+            isiAll.push(isikopos);
+        }
+        tampilKop(isiAll);
+    };
+
+    function Hapus(btn) {
+        var r = confirm("Apakah anda akan menghapus Warning");
+        if (r == true) {
+            baris = btn.parentNode.parentNode;
+            baris.parentNode.removeChild(baris);
+        }
+        nomorin();
+    }
+
+    function isiKopos() {
+        $.ajax({
+        url: '@Url.Action("listKoposKelurhan")',
+        type: 'GET',
+            data: { id: $('#kodepos_id').val()},
+            success: function (trans) {
+                tampilKop(trans);
+                },
+            error: function (ex) {
+                bootbox.alert('Data Kabupaten tidak ditemukan' + ex);
+            }
+        });
+    }
+    function nomorin() {
+        var ke = 0;
+        $("#koposGrid tr:not(:first)").each(function () {
+            ke += 1;
+            $($(this).find("td")[0]).find("label:eq(0)").text(ke +'.');
+        })
+
+    }
+
+    function tampilKop(trans) {
+        $("#koposGrid").simplePagingGrid({
+            minimumVisibleRows: trans.length,
+            pageSize: trans.length + 10,
+            pagingEnabled: false,
+            columnNames: ["No.", "Provinsi", "Kabupaten", "Kecamatan", "Kelurahan", "..."],
+            columnKeys: ["nomor", "provinsi_name", "kabupaten_name", "kecamatan_name", "kelurahan_name", "kelurahan_id"],
+            sortable: [false, false, false, false, false, false],
+            columnWidths: ["30px", "25%", "25%", "25%", "25%", "40px"],
+            showLoadingOverlay: false,
+            //pageNumber: 0,
+            tableClass: "table table-striped table-bordered",
+            cellTemplates: ['<label>{{nomor}}.</label><label hidden="hidden">{{kelurahan_id}}</label>'
+                , '<label >{{provinsi_name}}</label>'
+                , '<label >{{kabupaten_name}}</label>'
+                , '<label >{{kecamatan_name}}</label>'
+                , '<label >{{kelurahan_name}}</label>'
+                , '<input hidden="hidden" id="nilKel{{kelurahan_id}}" type="text" value="{{kelurahan_id}}" /><img alt="Detail Kodepos" onclick="Hapus(this)" src="/images/delete-icon.png"/>'],
+            data: trans
+        });
+    }
+
+    $('#cmdSimpan').click(function () {
+        var isikopos = { "kelurahan_id": "0", "kodepos_id":"0", "nomor": "0", "provinsi_name": "", "kabupaten_name": "", "kecamatan_name": "", "kelurahan_name": "", "dipilih": "1", "masuk": "1" }
+        var isiAll = [];
+        //var kodepos_id = $('#kodepos_id').val();
+
+        $("#koposGrid tr:not(:first)").each(function () {
+            //isikopos.kelurahan_id = kodepos_id
+            isikopos.kelurahan_id = $($(this).find("td")[0]).find("label:eq(1)").text();
+            isikopos.provinsi_name = $($(this).find("td")[1]).find("label:eq(0)").text();
+            isikopos.kabupaten_name = $($(this).find("td")[2]).find("label:eq(0)").text();
+            isikopos.kecamatan_name = $($(this).find("td")[3]).find("label:eq(0)").text();
+            isikopos.kelurahan_name = $($(this).find("td")[4]).find("label:eq(0)").text();
+
+            isiAll.push(isikopos);
+            isikopos = { "kelurahan_id": "0", "nomor": "0", "provinsi_name": "", "kabupaten_name": "", "kecamatan_name": "", "kelurahan_name": "", "dipilih": "1", "masuk": "1" }
+        })
+
+        var kodepos = { "kodepos_id": "0", "provinsi_id": "0", "nomor": "0", "provinsi_name": "", "kodepos_no": "", "kodepos_desc": "" }
+        kodepos.kodepos_id = $('#kodepos_id').val();
+        kodepos.provinsi_id = $('#provinsi_id').val();
+        kodepos.kodepos_no = $('#kodepos_no').val();
+        kodepos.kodepos_desc = $('#kodepos_desc').val();
+
+        var formData = new FormData();
+        formData.append('kodepos', JSON.stringify(kodepos));
+        formData.append('kelurahanKopos', JSON.stringify(isiAll));
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Simpan")',
+                type: 'POST',
+                datatype: "JSON",
+                processData: false,
+                contentType: false,
+                data: formData,
+                processData: false,
+                success: function (pesan) {
+                    alert(pesan.msg);
+                    if (pesan.salah == 0) { window.location.href = '/Kodepos/Index';}
+                },
+                error: function (er) {
+                    alert('Data Provisni Gagal disimpan');
+                }
+            })
+
+    })
+
+    $("#cmdHapus").click(function () {
+        var r = confirm("Apakah anda akan menghapus data Kecamatan");
+        if (r == true) {
+            $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Hapus")',
+                    dataType: 'json',
+                    data: { id: $('#kodepos_id').val()},
+                    success: function (pesan) {
+                        alert(pesan.msg);
+                        window.location.href = '/Kodepos/Index';
+                    },
+                    error: function (er) {
+                        alert('Data Kecamatan Gagal dihapus');
+                    }
+                });
+            };
+    });
+</script>

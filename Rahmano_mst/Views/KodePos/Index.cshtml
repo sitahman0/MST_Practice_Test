@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewBag.Title = "Data Kodepos";
+}
+
+<div id="my-form">
+    <div class="panel panel-default thumbnail">
+        <div class="panel-heading">
+            <table width="100%" height="35px">
+                <tr>
+                    <td class="judul" width="100px">List&nbsp;Kodepos&nbsp;</td>
+                    <td style="width:20%">
+                        @Html.DropDownList("provinsi_id", ViewBag.provinsi as SelectList, new { @class = "form-control", @style = "width:100%; max-width: 100%;" })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td style="width:20%">
+                        @Html.Editor("kodepos_no", new { htmlAttributes = new { @class = "form-control", @style = "width:100%; max-width: 100%;" } })
+                    </td>
+                    <td style="width:5px"></td>
+                    <td width="80px">
+                        <input type="button" value="Search" id="btnSearch" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                    <td></td>
+                    <td width="80px">
+                        <input type="button" value="New" id="btnCreate" class="btn btn-info btn-xs btn-block" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <div class="table-responsive" style="font-size:12px;margin-bottom:-15px;" id="exampleGrid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        bacaData();
+    });
+
+    $('#btnSearch').click(function () {
+        bacaData();
+    })
+
+    function bacaData() {
+        $.ajax({
+            url: '@Url.Action("SearchList")',
+            type: 'POST',
+            data: { id: $('#provinsi_id').val(), kpos: $('#kodepos_no').val()},
+            success: function (trans) {
+                conData(trans);
+            },
+            error: function () { bootbox.alert('Data Kodepos tidak dapat ditemukan'); }
+        });
+
+    }
+
+    function conData(trans) {
+        $("#exampleGrid").simplePagingGrid({
+            //minimumVisibleRows: 10,
+            pageSize: 10,
+            columnNames: ["No.", "Provinsi", "Kodepos", "Keterangan", "..."],
+            columnKeys: ["nomor", "provinsi_name", "kodepos_no", "kodepos_desc", "kodepos_id"],
+            sortable: [false, false, false, false, false],
+            columnWidths: ["30px", "20%", "100px", "", "40px"],
+            showLoadingOverlay: false,
+            pageNumber: 0,
+            tableClass: "table table-striped table-bordered",
+            cellTemplates: [null, null, null, null, '<img alt="Detail Kodepos" onclick="bukaKodepos({{kodepos_id}})" src="/images/edit-icon.png"/>'],
+            data: trans
+        });
+    }
+
+    $('#btnCreate').click(function () {
+        window.location = "/Kodepos/Edit/0";
+    });
+
+    function bukaKodepos(id) {
+        window.location = "/Kodepos/Edit/" + id;
+    };
+</script>
+
